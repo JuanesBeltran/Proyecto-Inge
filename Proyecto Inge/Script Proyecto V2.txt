@@ -1,0 +1,296 @@
+/*
+--DDL
+--SECCCION DE DROPS:--
+DROP TABLE IF EXISTS codigo_postal CASCADE;
+DROP TABLE IF EXISTS departamentos CASCADE;
+DROP TABLE IF EXISTS  provincias CASCADE;
+DROP TABLE IF EXISTS clientes CASCADE;
+DROP TABLE IF EXISTS compra CASCADE;
+DROP TABLE IF EXISTS orden CASCADE;
+DROP TABLE IF EXISTS restaurante CASCADE;
+DROP TABLE IF EXISTS factura CASCADE;
+-----------------------------
+*/
+
+CREATE TABLE departamentos(
+	NUM_DEP SMALLINT NOT NULL,
+	DEP VARCHAR(20),
+	PRIMARY KEY (NUM_DEP)
+);
+
+CREATE TABLE provincias(
+	NUM_PROV SMALLINT NOT NULL,
+	PROV VARCHAR(100),
+	PRIMARY KEY (NUM_PROV)
+);
+
+CREATE TABLE codigo_postal(
+	NUM VARCHAR(10) NOT NULL,
+	NUM_DEP SMALLINT NOT NULL,
+	NUM_PROV SMALLINT NOT NULL,
+	PRIMARY KEY (NUM),
+	FOREIGN KEY (NUM_DEP)
+	REFERENCES departamentos(NUM_DEP),
+	FOREIGN KEY (NUM_PROV)
+	REFERENCES provincias(NUM_PROV)
+);
+
+CREATE TABLE clientes(
+	ID CHAR(3) NOT NULL,
+	NOM VARCHAR(50),
+	NUM_PROV SMALLINT NOT NULL,
+	TEL BIGINT,
+	PRIMARY KEY (ID),
+	FOREIGN KEY (NUM_PROV)
+	REFERENCES provincias(NUM_PROV)
+);
+
+CREATE TABLE orden(
+	NUM_ORDEN INT NOT NULL,
+	COMIDA VARCHAR(50) NOT NULL,
+	CANTIDAD SMALLINT NOT NULL,
+	primary key(NUM_ORDEN, COMIDA)
+);
+
+CREATE TABLE restaurante(
+	ID_RES char(3) NOT NULL,
+	DIRECCION VARCHAR(50) NOT NULL,
+	TOT_PED SMALLINT NOT NULL,
+	TOT_DOM SMALLINT NOT NULL,
+	NUM_PROV SMALLINT NOT NULL,
+	PRIMARY KEY (ID_RES),
+	FOREIGN KEY (NUM_PROV)
+	REFERENCES provincias(NUM_PROV)
+);
+
+CREATE TABLE factura(
+	NUM_FACT char(3) NOT NULL,
+	ID CHAR(3) NOT NULL,
+	FECHA DATE,
+	NUM_ORDEN INT NOT NULL,
+	ID_RES char(3) NOT NULL,
+	PRECIO_TOTAL INT,
+	COMIDA VARCHAR(50),
+	
+	PRIMARY KEY (NUM_FACT),
+	FOREIGN KEY (ID)
+	REFERENCES clientes(ID),
+	FOREIGN KEY (NUM_ORDEN,Comida)
+	REFERENCES orden(NUM_ORDEN,COMIDA),
+	FOREIGN KEY (ID_RES)
+	REFERENCES restaurante(ID_RES)
+);
+
+--
+
+
+--SQL basico:
+---Carga de datos:
+COPY departamentos FROM 'C:\Proyecto Inge\departamentos.csv' WITH DELIMITER ';' CSV HEADER;
+select * from departamentos;
+
+COPY provincias FROM 'C:\Proyecto Inge\provincias.csv' WITH DELIMITER ';' CSV HEADER;
+Select * from provincias;
+
+COPY codigo_postal FROM 'C:\Proyecto Inge\codigo_postal.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from codigo_postal;
+
+COPY clientes FROM 'C:\Proyecto Inge\clientes.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from clientes;
+
+COPY orden FROM 'C:\Proyecto Inge\orden.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from orden;
+
+COPY restaurante FROM 'C:\Proyecto Inge\restaurante.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from restaurante;
+
+COPY factura FROM 'C:\Proyecto Inge\factura.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from factura;
+
+---cosultas de sql basico:
+
+SELECT provincias.prov--Seleccionar el nombre de las provincias cuyo codigo este entre 500 y 1000
+from provincias where num_prov>500 AND num_prov<1000;
+
+select AVG (tot_ped) AS Promedio 
+FROM restaurante
+WHERE id_res='R1 '; --Promedio de pedidos en los restaurantes, este caso en el primero
+
+--Consultas de SQL intermedio:
+
+select distinct f.id_res, c.nom--Nos da el nombre del cliente y el codigo del restaurante de su compra
+from clientes c inner join factura f on (c.id = f.id)
+				inner join restaurante r on (f.id_res = r.id_res)
+ORDER BY(f.id_res);
+
+select distinct sum(f.precio_total) AS total, f.comida, r.id_res
+FROM factura f INNER JOIN  restaurante r ON (r.id_res=f.id_res)
+GROUP BY(f.comida, r.id_res)--Selecciona el precio total de la cantidad que de comida que se ordeno
+ORDER BY(sum(f.precio_total));--en un restaurante
+
+--Consultas de SQL avanzazdo:
+
+DROP VIEW IF EXISTS vista1;
+create view vista1
+AS
+SELECT cp.num, fac.comida, res.direccion, cl.nom
+FROM codigo_postal cp INNER JOIN clientes cl ON (cp.num_prov=cl.num_prov)
+					  INNER JOIN factura fac ON (cl.id=fac.id)
+					  INNER JOIN restaurante res ON (fac.id_res=res.id_res);
+select *
+from vista1;--esta vista genera el lugar de residencia, la factura originida y el nombre
+			--Del cliente que la generó
+
+select distinct id_res AS id_restaurante, sum(tot_ped) AS total_pedidos, sum(tot_dom) AS total_domicilios
+FROM restaurante
+GROUP BY (id_res);--total de pedidos y domicilios de cada restaurante
+-----------------------------
+
+/*
+--DDL
+--SECCCION DE DROPS:--
+DROP TABLE IF EXISTS codigo_postal CASCADE;
+DROP TABLE IF EXISTS departamentos CASCADE;
+DROP TABLE IF EXISTS  provincias CASCADE;
+DROP TABLE IF EXISTS clientes CASCADE;
+DROP TABLE IF EXISTS compra CASCADE;
+DROP TABLE IF EXISTS orden CASCADE;
+DROP TABLE IF EXISTS restaurante CASCADE;
+DROP TABLE IF EXISTS factura CASCADE;
+-----------------------------
+*/
+
+CREATE TABLE departamentos(
+	NUM_DEP SMALLINT NOT NULL,
+	DEP VARCHAR(20),
+	PRIMARY KEY (NUM_DEP)
+);
+
+CREATE TABLE provincias(
+	NUM_PROV SMALLINT NOT NULL,
+	PROV VARCHAR(100),
+	PRIMARY KEY (NUM_PROV)
+);
+
+CREATE TABLE codigo_postal(
+	NUM VARCHAR(10) NOT NULL,
+	NUM_DEP SMALLINT NOT NULL,
+	NUM_PROV SMALLINT NOT NULL,
+	PRIMARY KEY (NUM),
+	FOREIGN KEY (NUM_DEP)
+	REFERENCES departamentos(NUM_DEP),
+	FOREIGN KEY (NUM_PROV)
+	REFERENCES provincias(NUM_PROV)
+);
+
+CREATE TABLE clientes(
+	ID CHAR(3) NOT NULL,
+	NOM VARCHAR(50),
+	NUM_PROV SMALLINT NOT NULL,
+	TEL BIGINT,
+	PRIMARY KEY (ID),
+	FOREIGN KEY (NUM_PROV)
+	REFERENCES provincias(NUM_PROV)
+);
+
+CREATE TABLE orden(
+	NUM_ORDEN INT NOT NULL,
+	COMIDA VARCHAR(50) NOT NULL,
+	CANTIDAD SMALLINT NOT NULL,
+	primary key(NUM_ORDEN, COMIDA)
+);
+
+CREATE TABLE restaurante(
+	ID_RES char(3) NOT NULL,
+	DIRECCION VARCHAR(50) NOT NULL,
+	TOT_PED SMALLINT NOT NULL,
+	TOT_DOM SMALLINT NOT NULL,
+	NUM_PROV SMALLINT NOT NULL,
+	PRIMARY KEY (ID_RES),
+	FOREIGN KEY (NUM_PROV)
+	REFERENCES provincias(NUM_PROV)
+);
+
+CREATE TABLE factura(
+	NUM_FACT char(3) NOT NULL,
+	ID CHAR(3) NOT NULL,
+	FECHA DATE,
+	NUM_ORDEN INT NOT NULL,
+	ID_RES char(3) NOT NULL,
+	PRECIO_TOTAL INT,
+	COMIDA VARCHAR(50),
+	
+	PRIMARY KEY (NUM_FACT),
+	FOREIGN KEY (ID)
+	REFERENCES clientes(ID),
+	FOREIGN KEY (NUM_ORDEN,Comida)
+	REFERENCES orden(NUM_ORDEN,COMIDA),
+	FOREIGN KEY (ID_RES)
+	REFERENCES restaurante(ID_RES)
+);
+
+--
+
+
+--SQL basico:
+---Carga de datos:
+COPY departamentos FROM 'C:\Proyecto Inge\departamentos.csv' WITH DELIMITER ';' CSV HEADER;
+select * from departamentos;
+
+COPY provincias FROM 'C:\Proyecto Inge\provincias.csv' WITH DELIMITER ';' CSV HEADER;
+Select * from provincias;
+
+COPY codigo_postal FROM 'C:\Proyecto Inge\codigo_postal.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from codigo_postal;
+
+COPY clientes FROM 'C:\Proyecto Inge\clientes.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from clientes;
+
+COPY orden FROM 'C:\Proyecto Inge\orden.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from orden;
+
+COPY restaurante FROM 'C:\Proyecto Inge\restaurante.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from restaurante;
+
+COPY factura FROM 'C:\Proyecto Inge\factura.csv' WITH DELIMITER ';' CSV HEADER;
+SELECT * from factura;
+
+---cosultas de sql basico:
+
+SELECT provincias.prov--Seleccionar el nombre de las provincias cuyo codigo este entre 500 y 1000
+from provincias where num_prov>500 AND num_prov<1000;
+
+select AVG (tot_ped) AS Promedio 
+FROM restaurante
+WHERE id_res='R1 '; --Promedio de pedidos en los restaurantes, este caso en el primero
+
+--Consultas de SQL intermedio:
+
+select distinct f.id_res, c.nom--Nos da el nombre del cliente y el codigo del restaurante de su compra
+from clientes c inner join factura f on (c.id = f.id)
+				inner join restaurante r on (f.id_res = r.id_res)
+ORDER BY(f.id_res);
+
+select distinct sum(f.precio_total) AS total, f.comida, r.id_res
+FROM factura f INNER JOIN  restaurante r ON (r.id_res=f.id_res)
+GROUP BY(f.comida, r.id_res)--Selecciona el precio total de la cantidad que de comida que se ordeno
+ORDER BY(sum(f.precio_total));--en un restaurante
+
+--Consultas de SQL avanzazdo:
+
+DROP VIEW IF EXISTS vista1;
+create view vista1
+AS
+SELECT cp.num, fac.comida, res.direccion, cl.nom
+FROM codigo_postal cp INNER JOIN clientes cl ON (cp.num_prov=cl.num_prov)
+					  INNER JOIN factura fac ON (cl.id=fac.id)
+					  INNER JOIN restaurante res ON (fac.id_res=res.id_res);
+select *
+from vista1;--esta vista genera el lugar de residencia, la factura originida y el nombre
+			--Del cliente que la generó
+
+select distinct id_res AS id_restaurante, sum(tot_ped) AS total_pedidos, sum(tot_dom) AS total_domicilios
+FROM restaurante
+GROUP BY (id_res);--total de pedidos y domicilios de cada restaurante
+-----------------------------
+

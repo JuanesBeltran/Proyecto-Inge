@@ -1,0 +1,6 @@
+﻿num_fac,id;fecha,num_orden,comida,id_res,precio_total
+F1,I6,5/02/2022,101,Hamburguesa,R1,80000
+F2,I4,5/02/2022,221,Coctel,R4,160000
+F3,I1,5/02/2022,789,Barras de pescado,R5,20000
+F4,I3,5/02/2022,410,Shawarma,R6,90000
+F5,I5,5/02/2022,753,Ensalada de frutas,R2,60000
